@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1458901202",
+    "project_id": "milu-social-media-app",
+    "storage_bucket": "milu-social-media-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1458901202:android:473fb927b92235926d1d0b",
+        "android_client_info": {
+          "package_name": "com.example.social_media_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJIII7aCi76xQUHcGdBgHoJgLEBIXjn8c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
