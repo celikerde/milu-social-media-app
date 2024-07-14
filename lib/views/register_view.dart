@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:social_media_app/constants/routes.dart';
 import 'package:social_media_app/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+
+import 'package:social_media_app/utilities/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -32,7 +35,8 @@ class _RegisterViewState extends State<RegisterView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register View'),
+        centerTitle: true,
+        title: const Text('Register'),
       ),
       body: FutureBuilder(
         future: Firebase.initializeApp(
@@ -50,8 +54,12 @@ class _RegisterViewState extends State<RegisterView> {
                       enableSuggestions: false,
                       autocorrect: false,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                           hintText: 'Please enter an email address',
+                          suffixIcon: IconButton(
+                            onPressed: _email.clear,
+                            icon: Icon(Icons.clear),
+                          ),
                           border: OutlineInputBorder()),
                     ),
                   ),
@@ -73,28 +81,42 @@ class _RegisterViewState extends State<RegisterView> {
                       final email = _email.text;
                       final password = _password.text;
                       try {
-                        final user = await FirebaseAuth.instance
+                        await FirebaseAuth.instance
                             .createUserWithEmailAndPassword(
                           email: email,
                           password: password,
                         );
+                        final user = FirebaseAuth.instance.currentUser;
+                        await user?.sendEmailVerification();
+                        Navigator.of(context).pushNamed(verifyEmailRoute);
                       } on FirebaseAuthException catch (e) {
                         if (e.code == 'invalid-email') {
-                          print("Invalid email");
+                          showErrorDialog(
+                            context,
+                            'Invalid email',
+                          );
                         } else if (e.code == "weak-password") {
-                          print('Weak password');
+                          showErrorDialog(
+                            context,
+                            'Weak password',
+                          );
                         } else if (e.code == "email-already-in-use") {
-                          print('Email is already taken');
+                          showErrorDialog(
+                            context,
+                            'Email already in use',
+                          );
+                        } else {
+                          showErrorDialog(
+                            context,
+                            "Error ${e.code}",
+                          );
                         }
                       } catch (e) {
-                        print(e.toString());
+                        showErrorDialog(
+                          context,
+                          e.toString(),
+                        );
                       }
-
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/login',
-                        (route) => false,
-                      );
                     },
                     child: const Text('Register!'),
                   ),
@@ -102,7 +124,7 @@ class _RegisterViewState extends State<RegisterView> {
                     onPressed: () {
                       Navigator.pushNamedAndRemoveUntil(
                         context,
-                        '/login',
+                        loginRoute,
                         (route) => false,
                       );
                     },

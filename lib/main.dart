@@ -1,8 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:social_media_app/constants/routes.dart';
 import 'package:social_media_app/firebase_options.dart';
 import 'package:social_media_app/views/login_view.dart';
+import 'package:social_media_app/views/post_view.dart';
 import 'package:social_media_app/views/register_view.dart';
+import 'package:social_media_app/views/verify_email_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,13 +24,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: '/',
       routes: {
-        '/': (context) => const HomeScreen(),
-        '/login': (context) => const LoginView(),
-        '/register': (context) => const RegisterView()
+        loginRoute: (context) => const LoginView(),
+        registerRoute: (context) => const RegisterView(),
+        verifyEmailRoute: (context) => const VerifyEmailView(),
+        postsRoute: (context) => const PostView(),
       },
-      //home: const LoginView(),
+      home: const HomeScreen(),
     );
   }
 }
@@ -36,26 +40,27 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Home Screen'),
-        ),
-        body: FutureBuilder(
-          future: Firebase.initializeApp(
-            options: DefaultFirebaseOptions.currentPlatform,
-          ),
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.done:
-                return Column(
-                  children: [
-                    Center(child: Text("dlsifj")),
-                  ],
-                );
-              default:
-                return CircularProgressIndicator(); // TODO: Handle this case.
+    return FutureBuilder(
+      future: Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      ),
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.done:
+            final user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              if (user.emailVerified) {
+                return const PostView();
+              } else {
+                return const VerifyEmailView();
+              }
+            } else {
+              return const LoginView();
             }
-          },
-        ));
+          default:
+            return const CircularProgressIndicator(); // TODO: Handle this case.
+        }
+      },
+    );
   }
 }
