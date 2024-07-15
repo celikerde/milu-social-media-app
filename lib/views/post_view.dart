@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:social_media_app/constants/routes.dart';
 import 'package:social_media_app/services/auth/auth_service.dart';
+import 'package:social_media_app/views/all_posts.dart';
 
 enum MenuAction { logout }
 
@@ -20,6 +22,12 @@ class _PostViewState extends State<PostView> {
         centerTitle: true,
         title: const Text('My Posts'),
         actions: [
+          ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, createPost, (route) => false);
+              },
+              label: Text("Add post")),
           PopupMenuButton<MenuAction>(
             onSelected: (value) async {
               switch (value) {
@@ -43,10 +51,28 @@ class _PostViewState extends State<PostView> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          const Text('Hello World!'),
-        ],
+      body: StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('All Posts')
+            .orderBy("TimeStamp", descending: false)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (context, index) {
+                  final post = snapshot.data!.docs[index];
+                  return AllPosts(
+                      headerText: post['headerText'],
+                      bodyText: post['bodyText']);
+                });
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
+          return const CircularProgressIndicator();
+        },
       ),
     );
   }

@@ -1,8 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:social_media_app/constants/routes.dart';
 import 'package:social_media_app/firebase_options.dart';
+import 'package:social_media_app/services/auth/auth_service.dart';
+import 'package:social_media_app/services/auth/auth_user.dart';
+import 'package:social_media_app/views/create_post.dart';
 import 'package:social_media_app/views/login_view.dart';
 import 'package:social_media_app/views/post_view.dart';
 import 'package:social_media_app/views/register_view.dart';
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         registerRoute: (context) => const RegisterView(),
         verifyEmailRoute: (context) => const VerifyEmailView(),
         postsRoute: (context) => const PostView(),
+        createPost: (context) => const CreatePost(),
       },
       home: const HomeScreen(),
     );
@@ -41,15 +43,13 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      ),
+      future: AuthService.firebase().initialize(),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
-            final user = FirebaseAuth.instance.currentUser;
+            final user = AuthService.firebase().currentUser;
             if (user != null) {
-              if (user.emailVerified) {
+              if (user.isEmailVerified) {
                 return const PostView();
               } else {
                 return const VerifyEmailView();
