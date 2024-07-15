@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:social_media_app/constants/routes.dart';
+import 'package:social_media_app/services/auth/auth_service.dart';
 
 enum MenuAction { logout }
 
@@ -18,7 +18,7 @@ class _PostViewState extends State<PostView> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Post View'),
+        title: const Text('My Posts'),
         actions: [
           PopupMenuButton<MenuAction>(
             onSelected: (value) async {
@@ -26,14 +26,13 @@ class _PostViewState extends State<PostView> {
                 case MenuAction.logout:
                   final isLogout = await showLogoutDialog(context);
                   if (isLogout) {
-                    FirebaseAuth.instance.signOut();
+                    AuthService.firebase().logOut();
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       loginRoute,
                       (route) => false,
                     );
                   }
               }
-              await FirebaseAuth.instance.signOut();
             },
             itemBuilder: (context) => [
               const PopupMenuItem<MenuAction>(
